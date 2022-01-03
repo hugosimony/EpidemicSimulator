@@ -19,6 +19,9 @@ import javax.swing.SwingConstants;
 public class Frame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
+	// Private instance
+	private Frame frame;
+	
 	// Tabs
 	public Cell[][] tabUI;
 	public int[][] tab;
@@ -38,9 +41,10 @@ public class Frame extends JFrame {
 	public int generation = 0;
 	
 	// Simulator settings
-	public int expositionRadius = 2; // radius where you are exposed between 0 and INT_MAX
-	public float contagiousness = 0.4f; // probability to contract between 0 and 1
-	public float lethality = 0.1f; // probability to be killed between 0 and 1
+	public int expositionRadius = 1; // radius where you are exposed between 1 and max(tabX, tabY)
+	public float contagiousness = 0.1f; // probability to contract between 0 and 1
+	public float recovery = 0.1f; // probability to recover between 0 and 1
+	public float lethality = 0.2f; // probability to be killed between 0 and 1
 	
 	private final String[] CONFIG_CHOICES =
 	{
@@ -50,6 +54,7 @@ public class Frame extends JFrame {
 	public Frame()
 	{
 		// Main frame settings
+		this.frame = this;
 		setTitle("Epidemic Simulator --- Made by Hugo Simony-Jungo");
 		setSize(tabX * 30 + 50, tabX * 30);
 		setResizable(false);
@@ -64,7 +69,7 @@ public class Frame extends JFrame {
 		});
 		
 		// Simulator settings
-		tab = Configurations.cluster;
+		tab = copyTab(Configurations.dispersed);
 		simulator = new Simulator(this);
 		
 		// Main panel
@@ -138,10 +143,12 @@ public class Frame extends JFrame {
 				{
 					simulator.paused = false;
 					start_pause.setText("Pause");
+					System.out.println(simulator.started);
 					if (!simulator.started)
 					{
+						System.out.println("test");
 						simulator.started = true;
-						new Timer().schedule(simulator, 10, 10);
+						new Timer().schedule(simulator, 50, 50);
 					}
 				}
 				else {
@@ -168,10 +175,43 @@ public class Frame extends JFrame {
 	    reset.setHorizontalAlignment(SwingConstants.CENTER);
 	    reset.setLocation(620, 0);
 	    reset.setSize(300, 50);
+	    reset.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				simulator.cancel();
+				start_pause.setText("Start");
+				simulator = new Simulator(frame);
+				generation = 0;
+				generationLabel.setText("Generation : 0");
+				tab = copyTab(Configurations.cluster);
+				updateCells();
+			}
+		});
 	    lowPanel.add(reset);
 	    
 	    mainPanel.add(lowPanel);
 	    
 	    this.add(mainPanel);
+	}
+	
+	public int[][] copyTab(int[][] tab)
+	{
+		int[][] newTab = new int[tabX][tabY];
+		for (int i = 0; i < tabX; ++i)
+		{
+			for (int j = 0; j < tabY; ++j)
+				newTab[i][j] = tab[i][j];
+		}
+		return newTab;
+	}
+	
+	public void updateCells()
+	{
+		for (int i = 0; i < tabX; ++i)
+		{
+			for (int j = 0; j < tabY; ++j)
+				tabUI[i][j].updateColor();
+		}
 	}
 }
