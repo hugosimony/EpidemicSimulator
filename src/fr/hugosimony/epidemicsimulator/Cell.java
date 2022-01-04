@@ -1,6 +1,8 @@
 package fr.hugosimony.epidemicsimulator;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 
@@ -33,6 +35,22 @@ public class Cell extends JButton {
 		this.y = y;
 		this.setSize(20, 20);
 		updateColor();
+		addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (frame.healthy.isSelected())
+					frame.tab[x][y] = 1;
+				else if (frame.exposed.isSelected())
+					frame.tab[x][y] = 2;
+				else if (frame.infected.isSelected())
+					frame.tab[x][y] = 3;
+				else if (frame.dead.isSelected())
+					frame.tab[x][y] = 9;
+				else if (frame.empty.isSelected())
+					frame.tab[x][y] = 0;
+				updateColor();
+			}
+		});
 	}
 	
 	public void updateColor()
